@@ -18,8 +18,8 @@ class Battery:
         self._RC_voltage = 0
 
         # polynomial representation of OCV vs SoC
-        self._OCV_model = Polynomial([3.1400, 3.9905, -14.2391, 24.4140, -13.5688, -4.0621, 4.5056])
-        #self._OCV_model = Polynomial([3.1400, 0.9905])
+        #self._OCV_model = Polynomial([3.1400, 3.9905, -14.2391, 24.4140, -13.5688, -4.0621, 4.5056])
+        self._OCV_model = Polynomial([3.1400, 0.9905])
 
     def update(self, time_delta):
         self.actual_capacity -= self.current * time_delta
@@ -85,12 +85,12 @@ if __name__ == '__main__':
     ax1 = fig.add_subplot(111)
 
     # title, labels
-    ax1.set_title('OCV,Termianl Volatage Vs SOC')
+    ax1.set_title('OCV,Terminal Voltage Vs SOC')
     ax1.set_xlabel('SoC')
     ax1.set_ylabel('Voltage')
 
-    ax1.plot(SoC, OCV, label="OCV")
-    ax1.plot(SoC, voltage, label="Total voltage")
+    ax1.plot(SoC, OCV,'green', label="OCV")
+    ax1.plot(SoC, voltage,'r', label="Terminal voltage")
     ax1.legend()
     plt.show()
 
