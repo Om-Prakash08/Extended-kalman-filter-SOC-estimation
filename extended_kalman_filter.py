@@ -4,23 +4,25 @@ import numpy as np
 
 class ExtendedKalmanFilter(object):
 
-    def __init__(self, x, F, B, P, Q, R, Hx, HJacobian):
+    def __init__(self, x, A, B, P, Q, R, Hx, HJacobian):
 
         self._x = x   # x = [[SoC], [RC voltage]]
-        self._F = F   # state transition model
+        self._A = A   # state transition model
         self._B = B    # control-input model
-        self._P = P     # state covariance
+        self._P = P     # state error covariance
         self._Q = Q      # process noise covariance matrix
         self._R = R     # measurement noise
         self._Hx = Hx
         self._HJacobian = HJacobian
 
+        print("om",self.x, HJacobian(self.x),Hx(self.x))
+
 
     def update(self, z):
 
-        P = self._P
-        R = self._R
-        x = self._x
+        P = self._P  # state error covariance
+        R = self._R    # measurement noise
+        x = self._x   # x = [[SoC], [RC voltage]]
 
         H = self._HJacobian(x)
 
@@ -37,8 +39,8 @@ class ExtendedKalmanFilter(object):
         self._P = I_KH * P * I_KH.T + K * R * K.T
 
     def predict(self, u=0):
-        self._x = self._F * self._x + self._B * u
-        self._P = self._F * self._P * self._F.T + self._Q
+        self._x = self._A * self._x + self._B * u
+        self._P = self._A * self._P * self._A.T + self._Q
 
     @property
     def x(self):
