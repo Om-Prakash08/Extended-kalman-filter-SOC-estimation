@@ -18,7 +18,7 @@ class Polynomial:
 
 
 if __name__ == '__main__':
-    my_poly = Polynomial([4,3,2,1,0])
+    my_poly = Polynomial([4,3,2,1,0.1])
     my_poly_deriv = my_poly.deriv
     print(my_poly._coeffs)
     print(my_poly_deriv._coeffs)
