@@ -1,52 +1,47 @@
-def launch_experiment_protocol(Q_tot, time_step, experiment_callback):
+import numpy as np
 
-    charge_current_rate = 0.5 #C
-    discharge_current_rate = 1 #C
-    discharge_constants_stages_time = 20*60 #s
-    pulse_time = 60 #s
-    total_pulse_time = 40*60 #s
 
-    high_cut_off_voltage = 4.2
-    low_cut_off_voltage = 2.5
 
-    #charge CC
-    current = -charge_current_rate * Q_tot
-    voltage = 0
-    while voltage < high_cut_off_voltage:
-        voltage = experiment_callback(current)
+class ExtendedKalmanFilter(object):
 
-    #charge CV
-    while current < -0.1:
-        #pseudo current control to simulate CV charge
-        if voltage > high_cut_off_voltage*1.001:
-            current += 0.01 * Q_tot
-        voltage = experiment_callback(current)
+    def __init__(self, x, A, B, P, Q, R, Hx, HJacobian):
 
-    #discharge first stage
-    time = 0
-    current = discharge_current_rate * Q_tot
-    while time < discharge_constants_stages_time:
-        experiment_callback(current)
-        time += time_step
+        self._x = x   # x = [[SoC], [RC voltage]]
+        self._A = A   # state transition model
+        self._B = B    # control-input model
+        self._P = P     # state error covariance
+        self._Q = Q      # process noise covariance matrix
+        self._R = R     # measurement noise
+        self._Hx = Hx
+        self._HJacobian = HJacobian
 
-    #discharge pulses stage
-    time = 0
-    while time < total_pulse_time:
-        time_low = 0
-        current = 0
-        while time_low < pulse_time:
-            experiment_callback(current)
-            time_low += time_step
-        time_high = 0
-        current = discharge_current_rate * Q_tot
-        while time_high < pulse_time:
-            experiment_callback(current)
-            time_high += time_step
-        time += time_low + time_high
+        print("om",self.x, HJacobian(self.x),Hx(self.x))
 
-    #discharge last stage
-    time = 0
-    current = discharge_current_rate * Q_tot
-    while time < discharge_constants_stages_time:
-        experiment_callback(current)
-        time += time_step
+
+    def update(self, z):
+
+        P = self._P  # state error covariance
+        R = self._R    # measurement noise
+        x = self._x   # x = [[SoC], [RC voltage]]
+
+        H = self._HJacobian(x)
+
+        S = H * P * H.T + R
+        K = P * H.T * S.I
+        self._K = K
+
+        hx =  self._Hx(x)
+        y = np.subtract(z, hx)
+        self._x = x + K * y
+
+        KH = K * H
+        I_KH = np.identity((KH).shape[1]) - KH
+        self._P = I_KH * P * I_KH.T + K * R * K.T
+
+    def predict(self, u=0):
+        self._x = self._A * self._x + self._B * u
+        self._P = self._A * self._P * self._A.T + self._Q
+
+    @property
+    def x(self):
+        return self._x
