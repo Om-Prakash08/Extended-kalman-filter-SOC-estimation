@@ -63,9 +63,9 @@ def plot_everything(time, true_voltage, mes_voltage, true_SoC, estim_SoC, curren
 
 
     ax1.plot(time, true_voltage,'red', label="True voltage")
-    ax1.plot(time, mes_voltage,'yellow', label="Measured voltage")
+    ax1.plot(time, mes_voltage,'green', label="Measured voltage")
     ax2.plot(time, true_SoC,'r', label="True SoC")
-    ax2.plot(time, estim_SoC,'yellow', label="Estimated SoC")
+    ax2.plot(time, estim_SoC,'green', label="Estimated SoC")
     ax3.plot(time, current,'r', label="Current")
     
     ax1.legend()
@@ -126,8 +126,9 @@ if __name__ == '__main__':
     
     # launch experiment
     launch_experiment_protocol(Q_tot, time_step, update_all)
-    print(time)
-    print(true_voltage)
+    # print(time)
+    # print(true_voltage)
+    # print(np.random.normal(0,0.1,1))
     # plot stuff
     plot_everything(time, true_voltage, mes_voltage, true_SoC, estim_SoC, current)
 
